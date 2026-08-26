@@ -13,8 +13,26 @@
 #include "resource_monitor.h"
 
 /*
- * One complete optimization cycle result. Everything the terminal UI or the
- * GUI needs to display WHAT was done and WHY, with real numbers attached.
+ * Action and verification outcome for one target process.
+ */
+struct TargetActionReport {
+    pid_t pid = 0;
+    std::string name;
+    double cpuBefore = -1.0;
+    double cpuAfter = -1.0;
+    bool targetExited = false;
+    double resourceScore = 0.0;
+    int importanceScore = 0;
+    std::string decisionReason;
+    std::string actionDescription;
+    std::string actionOutcome;
+    bool success = false;
+    std::string verdict;
+};
+
+/*
+ * One complete optimization cycle result covering up to TOP 3 processes.
+ * Everything the terminal UI or GUI needs to display WHAT was done and WHY.
  */
 struct OptimizationReport {
     bool actionAttempted = false;
@@ -24,7 +42,7 @@ struct OptimizationReport {
     pid_t targetPid = 0;
 
     std::string pressureLevel;      // NORMAL / ELEVATED / HIGH
-    std::string decisionReason;     // why this target was chosen
+    std::string decisionReason;     // why targets were chosen
     std::string actionDescription;  // what we attempted
     std::string actionOutcome;      // incl. raw OS error text on failure
 
@@ -34,6 +52,9 @@ struct OptimizationReport {
 
     bool success = false;
     std::string improvementVerdict;
+
+    /* Up to TOP 3 optimized target details */
+    std::vector<TargetActionReport> targets;
 
     /* Multi-line human-readable rendering shared by both frontends. */
     std::vector<std::string> lines() const;

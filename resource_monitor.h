@@ -29,6 +29,18 @@ struct CpuSnapshot {
 };
 
 /*
+ * Detailed CPU utilization breakdown (User vs Kernel/System vs Nice vs Idle)
+ * measured directly from kernel Mach host_statistics CPU ticks.
+ */
+struct CpuBreakdown {
+    double totalPercent = 0.0;
+    double userPercent = 0.0;
+    double systemPercent = 0.0;
+    double idlePercent = 0.0;
+    double nicePercent = 0.0;
+};
+
+/*
  * OS CONCEPT - virtual memory accounting:
  * macOS manages physical RAM in fixed-size PAGES (16 KB on Apple Silicon).
  * host_statistics64() reports how many pages are currently:
@@ -73,6 +85,9 @@ public:
        (percent, 0..100+) measured between the previous snapshot and a fresh
        one. Returns -1.0 when the kernel counters are unavailable. */
     double measureCpuUsage(int intervalMs);
+
+    /* Measures detailed CPU breakdown (total, user, system, idle, nice) over intervalMs. */
+    bool measureCpuDetailed(int intervalMs, CpuBreakdown &out);
 
     /* Immediate RAM statistics. Never blocks. */
     bool readMemoryInfo(MemoryInfo &out);

@@ -82,6 +82,44 @@ double ResourceMonitor::measureCpuUsage(int intervalMs)
            static_cast<double>(totalDelta);
 }
 
+bool ResourceMonitor::measureCpuDetailed(int intervalMs, CpuBreakdown &out)
+{
+    CpuSnapshot before;
+    if (hasPrevious_)
+        before = previous_;
+    else if (!captureCpuSnapshot(before))
+        return false;
+
+    if (intervalMs > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
+
+    CpuSnapshot after;
+    if (!captureCpuSnapshot(after))
+        return false;
+
+    previous_ = after;
+    hasPrevious_ = true;
+
+    uint64_t totalDelta = after.total() - before.total();
+    if (totalDelta == 0) {
+        out = CpuBreakdown{};
+        return true;
+    }
+
+    uint64_t busyDelta = after.busy() - before.busy();
+    uint64_t userDelta = after.user - before.user;
+    uint64_t systemDelta = after.system - before.system;
+    uint64_t idleDelta = after.idle - before.idle;
+    uint64_t niceDelta = after.nice - before.nice;
+
+    out.totalPercent = 100.0 * static_cast<double>(busyDelta) / static_cast<double>(totalDelta);
+    out.userPercent = 100.0 * static_cast<double>(userDelta) / static_cast<double>(totalDelta);
+    out.systemPercent = 100.0 * static_cast<double>(systemDelta) / static_cast<double>(totalDelta);
+    out.idlePercent = 100.0 * static_cast<double>(idleDelta) / static_cast<double>(totalDelta);
+    out.nicePercent = 100.0 * static_cast<double>(niceDelta) / static_cast<double>(totalDelta);
+    return true;
+}
+
 bool ResourceMonitor::readMemoryInfo(MemoryInfo &out)
 {
     vm_statistics64_data_t vm;

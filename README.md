@@ -127,9 +127,7 @@ The optimizer runs in cycles. Each cycle follows this exact sequence:
 
 ### Target Selection
 
-Among all eligible processes, the optimizer picks the **single process with the
-highest ActionPriority score**. This ensures we always act on the biggest resource
-consumer first, while respecting importance constraints.
+Among all eligible user-owned processes, the optimizer selects and deprioritizes the **Top 3 processes with the highest ActionPriority and CPU usage**. It does not require an artificial >20% CPU barrier, ensuring smooth system-wide optimization whenever user tasks compete for CPU cycles, while respecting importance and system protection constraints.
 
 ### What Action Is Taken?
 
@@ -142,6 +140,7 @@ setpriority(PRIO_PROCESS, targetPID, currentNice + increment)
 - `PRIO_PROCESS` = affect only this one process
 - `currentNice + increment` = make it slightly less urgent to the scheduler
 - `increment` starts at +2, grows to +5 with consecutive failures
+- Acts concurrently on the **Top 3** highest priority candidate processes
 
 **What we NEVER do:**
 - Never kill processes (`kill()`)
@@ -179,7 +178,7 @@ ResourceScore = 0.55 × CPU% + 0.30 × MEM% + 0.15 × StateFactor
 Where:
   CPU%     = measured system-wide CPU utilization (0-100)
   MEM%     = memory used / total memory × 100 (0-100)
-  StateFactor = 1.0 if RUNNING, 0.5 if SLEEPING, 0.3 if STOPPED
+  StateFactor = 100.0 if RUNNING, 25.0 if SLEEPING, 0.0 if STOPPED
 
 ImportanceScore:
   100 = CRITICAL/PROTECTED (kernel_task, launchd, WindowServer, etc.)
@@ -187,11 +186,6 @@ ImportanceScore:
    10 = NORMAL (ordinary user processes)
 
 ActionPriority = ResourceScore × (1 − ImportanceScore/100)
-
-Classification Thresholds:
-  kHeavyResourceScore = 20  (≈ one full core on 8-core Mac)
-  kNormalResourceScore = 12 (used under HIGH pressure)
-  kImportantImportance = 60
 ```
 
 ### Why These Weights?
@@ -199,13 +193,6 @@ Classification Thresholds:
 - **CPU = 0.55**: The primary resource we can control via nice values
 - **MEM = 0.30**: Memory hogs slow the whole system, but we can't reclaim it
 - **State = 0.15**: Running processes contribute more pressure than sleeping ones
-
-### Why threshold = 20?
-
-On an 8-core Mac, one fully busy core = 12.5% of total capacity. A process
-using ≥15-20% CPU is consuming at least one core's worth. The scoring formula
-with typical memory usage pushes heavy processes above 20, making this a
-natural threshold.
 
 ---
 
@@ -242,19 +229,19 @@ syscall; mismatches abort the action and are logged as safety events.
 ## Build & Run
 
 ```bash
-# Terminal UI (text menu with ANSI colors)
+# Option 1: Using the interactive build & run script
+./run.sh
+
+# Option 2: Build & run Terminal UI manually
 clang++ -std=c++17 -Wall -Wextra *.cpp -o smart_optimizer
 ./smart_optimizer
 
-# Native macOS GUI (AppKit/Cocoa window with graphs)
+# Option 3: Build & run Native macOS GUI manually
 clang++ -std=c++17 -Wall -fobjc-arc gui_main.mm \
   system_info.cpp resource_monitor.cpp process_monitor.cpp \
   process_analyzer.cpp important_process.cpp process_controller.cpp \
   optimizer.cpp activity_logger.cpp -framework Cocoa -o smart_optimizer_gui
 ./smart_optimizer_gui
-
-# Or run everything with one command:
-./demo.sh
 ```
 
 ---
@@ -264,15 +251,16 @@ clang++ -std=c++17 -Wall -fobjc-arc gui_main.mm \
 | File | Purpose |
 |------|---------|
 | `main.cpp` | Terminal menu UI — 8 options, ANSI colors, Unicode bars |
-| `gui_main.mm` | Native macOS GUI — AppKit/Cocoa, live line charts, buttons |
+| `gui_main.mm` | Native macOS GUI — AppKit/Cocoa, 5 live telemetry charts, dynamic layout |
 | `system_info.h/.cpp` | Read hardware info via sysctlbyname (model, cores, RAM, page size) |
 | `resource_monitor.h/.cpp` | System-wide CPU% and memory via Mach host_statistics |
 | `process_monitor.h/.cpp` | Full process table via sysctl + libproc, per-process CPU% |
 | `process_analyzer.h/.cpp` | Dual-score model: ResourceScore + ImportanceScore |
 | `important_process.h/.cpp` | 5 protection rules with detailed reasons |
 | `process_controller.h/.cpp` | setpriority() + kill() wrappers with errno mapping |
-| `optimizer.h/.cpp` | Decision engine: target selection, TOCTOU guard, feedback loop |
+| `optimizer.h/.cpp` | Decision engine: Top 3 candidate selection, TOCTOU guard, feedback loop |
 | `activity_logger.h/.cpp` | Timestamped audit log (file + in-memory history) |
+| `run.sh` | Interactive build and launch launcher script |
 | `demo.sh` | One-command live demonstration script |
 
 ---
@@ -290,13 +278,13 @@ clang++ -std=c++17 -Wall -fobjc-arc gui_main.mm \
 
 ---
 
-## GUI Features
+## GUI Features & Rich Telemetry
 
-- **System CPU %** — live line chart, green, updates every scan
-- **Memory used %** — live line chart, blue, updates every scan
-- **Optimization effect** — before/after bar chart, color-coded by result
-- **Process table** — top 20 processes with PID, state, CPU%, bar graph, memory, name
-- **Refresh Scan** — manual scan button
-- **Run Smart Optimization** — one-click optimization cycle
-- **Show Log** — display recent activity log entries
-- **Auto refresh** — toggle 3-second automatic scanning
+- **Multi-Series CPU Telemetry Graph (Top-Left)** — Live 80-sample history rendering Total CPU (Emerald `#10b981`), User Space CPU (Cyan `#06b6d4`), and Kernel/System CPU (Rose `#f43f5e`) with smooth vertical gradient fills, grid lines, Y-axis markers, optimization event marker pins, and header stats (Current, User, Kernel, Peak).
+- **Multi-Series Memory Distribution Graph (Top-Right)** — Detailed RAM accounting displaying Active RAM (Azure `#38bdf8`), Wired Kernel RAM (Purple `#a855f7`), Compressed RAM (Amber `#f59e0b`), and Total Used RAM (Neon Pink `#ec4899`) with live GB/percentage badges.
+- **Optimization Impact Analysis Chart (Middle-Left)** — Dual-column before/after bar chart comparing target process CPU% before and after renice actions, complete with percentage savings delta badges (e.g. `▼ -35% CPU`), target process name & PID labels, and outcome-coded gradients.
+- **Top 5 CPU Processes Mini-Bar Widget (Middle-Right)** — Live real-time meters showing top CPU consuming tasks with PID, process name, state badges (🟢 RUN / 🔵 SLEEP), and dynamic heatmaps (Teal → Cyan → Amber → Crimson).
+- **System Pressure & Load Trend Graph (Bottom-Right)** — Dedicated telemetry card sized at 2/3 width of the main graphs, visualizing concurrent CPU load & RAM pressure curves, live pressure badges (`NORMAL` / `ELEVATED` / `HIGH`), and glowing live data points.
+- **Terminal Console (Bottom-Left)** — Syntax-highlighted dark console log taking the remaining bottom width, displaying real-time scan tables and optimization audit reports.
+- **Responsive Dynamic Layout Architecture** — Uses top-anchoring (`layoutSubviews` + `NSWindowDelegate`) below macOS window controls, ensuring crisp, gap-free rendering on any display size (MacBook Pro 13", 14", 16", or external monitors) with full window resizing support.
+- **Dark Glassmorphism UI & Controls** — Modern slate obsidian theme (`#0f1219` / `#161b26`), styled toolbar buttons (⚡ Refresh Scan, 🚀 Run Smart Optimization, 📋 Show Log, 🧹 Clear Log, ⏱️ Smart Auto Mode 3s cycle).
