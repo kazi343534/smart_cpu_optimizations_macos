@@ -1,13 +1,44 @@
 # Smart Process Optimizer
 
-**NSU CSE323 Operating Systems Course Project**
-**Platform: macOS Apple Silicon (ARM64) — MacBookPro17,1, 8 cores, 8 GB RAM**
+**NSU CSE323 Operating Systems Course Project**  
+**Platform: macOS Apple Silicon (ARM64) — MacBookPro17,1, 8 cores, 8 GB RAM**  
 
-A C++17 application that reads **real process and system data directly from the
-macOS kernel**, scores every running process using a dual-score resource/importance
-model, performs **safe, real scheduling actions** via system calls (`setpriority`),
-measures whether performance actually improved, and **adapts its strategy from the
-results** — all with zero simulation and zero fake data.
+[![Watch Demo Video](https://img.shields.io/badge/Google%20Drive-Watch%20Demo%20Video%20(4:59)-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)
+[![macOS Platform](https://img.shields.io/badge/Platform-macOS%20Apple%20Silicon-black?style=for-the-badge&logo=apple)](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)
+[![Language](https://img.shields.io/badge/Language-C%2B%2B17%20%7C%20Obj--C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)
+[![Course](https://img.shields.io/badge/Course-NSU%20CSE323%20OS-red?style=for-the-badge)](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)
+
+A C++17 application that reads **real process and system data directly from the macOS kernel**, scores every running process using a dual-score resource/importance model, performs **safe, real scheduling actions** via system calls (`setpriority`), measures whether performance actually improved, and **adapts its strategy from the results** — all with zero simulation and zero fake data.
+
+---
+
+## 🎥 Project Video Presentation & Live Demonstration
+
+> [!TIP]
+> **Faculty & Reviewer Quick Link:** Click the banner below or use the direct link to watch the complete 5-minute video presentation and live system demonstration.
+
+[![Watch Live Demonstration Video](assets/video_preview_banner.png)](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)
+
+### 🔗 Direct Video Link
+👉 **[Click Here to Open / Watch the Full Video on Google Drive](https://drive.google.com/file/d/1N7y2BzGSoYYYDn8Czxz1FlbFoh8sr9tn/view)**
+
+---
+
+### ⚡ Live UI & Optimization Telemetry Preview
+
+![Smart Process Optimizer Live GUI Demo](assets/gui_live_demo.gif)
+
+---
+
+### ⏱️ Video Presentation Highlights & Timestamps
+
+| Timestamp | Topic | Description |
+|-----------|-------|-------------|
+| **0:00 – 0:45** | **System & Architecture Overview** | Hardware detection via `sysctlbyname` and live kernel telemetry via Mach interfaces (`host_statistics`, `host_statistics64`). |
+| **0:45 – 1:40** | **Process Table & Dual-Score Model** | Live enumeration of 450+ processes via `libproc`/`sysctl(KERN_PROC_ALL)` and dual scoring (Resource Score vs. Importance Score). |
+| **1:40 – 2:45** | **High-Pressure Detection & Top 3 Targets** | Automatic classification of system pressure and dynamic candidate prioritization among user processes. |
+| **2:45 – 3:50** | **Safe Renicing & TOCTOU Guard** | Execution of `setpriority()` system call, read-back verification, and `proc_pidpath()` safety checks. |
+| **3:50 – 4:59** | **Before/After Verification & Charts** | Verification of real CPU drops, multi-series dynamic Cocoa graphs, and adaptive feedback loop cooldown. |
 
 ---
 
