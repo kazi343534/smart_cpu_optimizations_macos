@@ -30,7 +30,7 @@ A C++17 application that reads **real process and system data directly from the 
 
 </div>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -46,7 +46,7 @@ A C++17 application that reads **real process and system data directly from the 
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -70,7 +70,7 @@ Smart Process Optimizer is an intelligent system resource manager. It continuous
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -131,7 +131,7 @@ The optimizer runs in cycles. Each cycle follows this precise sequence:
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -180,7 +180,7 @@ setpriority(PRIO_PROCESS, targetPID, currentNice + increment)
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -203,7 +203,7 @@ setpriority(PRIO_PROCESS, targetPID, currentNice + increment)
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -228,7 +228,7 @@ ActionPriority = ResourceScore × (1 − ImportanceScore/100)
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -251,7 +251,7 @@ Between scanning and acting, the OS can recycle a PID. Fixed: identity is re-ver
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -275,7 +275,7 @@ clang++ -std=c++17 -Wall -fobjc-arc gui_main.mm \
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
 <br/>
 
@@ -293,8 +293,8 @@ clang++ -std=c++17 -Wall -fobjc-arc gui_main.mm \
 
 <br/>
 
----
+<img src="assets/animated_divider.svg" width="100%" />
 
-<p align="center">
-  <i>Built with ❤️ for macOS Operating Systems Architecture.</i>
-</p>
+<div align="center">
+  <img src="assets/animated_footer.svg" alt="Built with love for macOS" width="100%" />
+</div>

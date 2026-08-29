@@ -1,0 +1,39 @@
+<svg width="800" height="20" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#020617" stop-opacity="0" />
+      <stop offset="30%" stop-color="#38bdf8" stop-opacity="1" />
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="1" />
+      <stop offset="70%" stop-color="#34d399" stop-opacity="1" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="flareGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect x="0" y="9" width="100%" height="2" fill="url(#lineGrad)" opacity="0.3" />
+  
+  <rect x="0" y="9" width="100%" height="2" fill="url(#lineGrad)" filter="url(#glow)">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite" />
+  </rect>
+  
+  <circle cx="0" cy="10" r="3" fill="#ffffff" filter="url(#glow)">
+    <animate attributeName="cx" values="0;800;0" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0;0" dur="5s" keyTimes="0;0.1;0.9;1;1" repeatCount="indefinite" />
+  </circle>
+  
+  <rect x="0" y="8" width="80" height="4" fill="url(#flareGrad)" filter="url(#glow)">
+    <animate attributeName="x" values="-80;800;-80" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0;0" dur="5s" keyTimes="0;0.1;0.9;1;1" repeatCount="indefinite" />
+  </rect>
+</svg>
